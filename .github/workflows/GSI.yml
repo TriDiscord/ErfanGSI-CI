@@ -13,7 +13,6 @@ on:
 jobs:
   Port:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v2
       - name: Free Up Space & Set ENV Values
@@ -31,7 +30,13 @@ jobs:
         run: git clone --recurse-submodules https://github.com/erfanoabdi/ErfanGSIs.git && cd ErfanGSIs && bash setup.sh
 
       - name: Start Porting
-        run: cd ErfanGSIs && sudo ./url2GSI.sh "${{ github.event.inputs.ROM_LINK }}" "${{ github.event.inputs.ROM_TYPE }}"
+        run: |
+          cd ErfanGSIs
+          ERROR=$(sudo ./url2GSI.sh "${{ github.event.inputs.ROM_LINK }}" "${{ github.event.inputs.ROM_TYPE }}" | echo $?)
+          if [ $ERROR != 1 ]
+          then
+            false
+          fi
 
       - name: Upload
         if: always()
